@@ -1,9 +1,9 @@
 --script accepts both usernames and userids (in case you want to really make sure someone stays admin by checking their userid)
 
-local adminnames = {"PlusReed", "Oozlebachr", "Enfys"}
-local adminids = {13135356, 4353611, 36305601}
-local bannednames = {"NowDoTheHarlemShake"}
-local bannedids = {38506985}
+local adminnames = {"PlusReed", "Oozlebachr", "Enfys"} -- cool peeps
+local adminids = {13135356, 4353611, 36305601} -- also cool peeps
+local bannednames = {"NowDoTheHarlemShake"} -- ayy lmao
+local bannedids = {38506985} -- ayy lmao x2
 
 --==========variables
 
