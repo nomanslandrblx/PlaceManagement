@@ -13,6 +13,10 @@ local rbxutil = assert(LoadLibrary("RbxUtility"))
 local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
 
+--==========config [CS]
+
+local autokick = true -- can be used to write custom ban handlers
+
 --==========functions
 
 function checkifadmin(player)
@@ -74,9 +78,12 @@ end
 --==========ready
 
 game:GetService("Players").PlayerAdded:connect(function(player)
-	if checkifbanned(player) then
-		player:Kick() --see u
-	elseif checkifadmin(player) then
+	if autokick == true then
+		if checkifbanned(player) then
+			player:Kick() --see u
+		end
+	end
+	if checkifadmin(player) then
 		--insert admin things here
 	end
 end)
