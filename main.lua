@@ -11,6 +11,7 @@ local creatorid = game.CreatorId
 --==========functions
 
 --check if value [player] exists in table [t]
+--ex print(checkifintable(adminids,4353611)
 function checkifintable(t,player)
 	for i,v in ipairs(t) do
 		if v == player.userId then
@@ -21,6 +22,7 @@ end
 
 --remove value [value] from table [t]
 --if [short], shorten values in the table to the provided value and then check
+--ex removefromtable(adminids,4353611) print(checkifintable(adminids,4353611)
 function removefromtable(t,value,short)
 	for i,v in ipairs(t) do
 		if (short and string.sub(v,string.len(value)) == value) or v == value then
@@ -29,6 +31,27 @@ function removefromtable(t,value,short)
 		end
 	end
 end
+
+--splits the string [str] by divider [div] and returns a table of the results
+--currently only supports single character dividers
+--ex for i,v in ipairs(split("enfys is a noob"," ")) do print(v) end
+--maybe use this for commands (!kill enfys -> split returns !kill, enfys -> pass enfys as argument to function kill) ~oozle
+function split(str,div)
+	local results = {}
+	local currentresult = ""
+	for i=1,string.len(str) do
+		local current = string.sub(str,i,i)
+		if current:match(div) then
+			table.insert(results,currentresult)
+			currentresult = ""
+		else
+			currentresult = currentresult..current
+		end
+	end
+	table.insert(results,currentresult)
+	return results
+end
+
 
 --==========initial setup
 
