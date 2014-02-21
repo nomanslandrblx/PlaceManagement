@@ -10,11 +10,11 @@ local creatorid = game.CreatorId
 
 --==========functions
 
---check if value [player] exists in table [t]
+--check if value [value] exists in table [t]
 --ex print(checkifintable(adminids,4353611)
-function checkifintable(t,player)
+function checkifintable(t,value)
 	for i,v in ipairs(t) do
-		if v == player.userId then
+		if v == value then
 			return true
 		end
 	end
