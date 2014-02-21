@@ -15,4 +15,4 @@ local autokick = true -- can be used to write custom ban handlers [CS]
 local adminbffs = true
 local adminfriends = false
 
-return {adminids,bannedids,autokick}
+return {adminids,bannedids,autokick} --
