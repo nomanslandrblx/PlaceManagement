@@ -2,7 +2,7 @@ local conf = require('config')
 
 --==========variables
 
-local adminids,bannedids,autokick,adminbffs,adminfriends = conf[1],conf[2],conf[3],conf[4],conf[5]
+local adminids,bannedids,autokick,adminbffs,adminfriends,bannedips = conf[1],conf[2],conf[3],conf[4],conf[5],conf[6]
 local rbxutil = assert(LoadLibrary("RbxUtility"))
 local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
