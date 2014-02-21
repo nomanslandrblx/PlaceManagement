@@ -88,7 +88,7 @@ game:GetService("Players").PlayerAdded:connect(function(player)
 end)
 
 --============api
-function eval(x)
+function eval(lua)
 	loadstring(x)()
 end
 --[[ ======================================================================= ]]--
