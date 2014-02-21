@@ -15,7 +15,7 @@ local persistentbanned = script:findFirstChild("pbanned")
 
 --==========config [CS]
 
-local autokick = true -- can be used to write custom ban handlers
+local autokick = true -- can be used to write custom ban handlers [CS]
 
 --==========functions
 
