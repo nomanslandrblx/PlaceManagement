@@ -8,6 +8,13 @@ local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
 local creatorid = game.CreatorId
 
+--==========admin commands
+
+--these are the commands
+local commands = {
+	doprint = function(arg,arg2) print(arg,arg2) end
+}
+
 --==========functions
 
 --check if value [value] exists in table [t]
@@ -52,6 +59,44 @@ function split(str,div)
 	return results
 end
 
+--main function to run commands, processes the string [str]
+--processing: check if command -> split -> find function -> concat arguments -> run function and pass arguments
+--ex processcommand("!doprint hello world")
+function processcommand(str)
+	if string.sub(str,1,1) == "!" then --check if it's actually a command
+		
+		--split string into its constituent items
+		local items = split(str," ")		
+		
+		--find the command
+		command = items[1]
+		command = string.sub(command,2,string.len(command))
+		command = commands[command]
+		
+		if command then
+			table.remove(items,1)
+			
+			--concatenate arguments into "arg1, arg2, arg3, arg#" etc
+			local arguments = ""
+			for _,arg in ipairs(items) do
+				arguments = arguments..[["]]..arg..[[",]]
+			end
+			
+			--assemble the parts
+			local arguments = "("..string.sub(arguments,1,string.len(arguments)-1)..")"
+			
+			--loadstring it
+			local func = function() assert(loadstring("command"..arguments))() end
+			
+			--run it
+			func()
+			
+		else
+			print([["]]..items[1]..[[" is not a valid command]])
+		end
+
+	end
+end
 
 --==========initial setup
 
@@ -62,24 +107,26 @@ if not persistentadmins then
 end
 if not persistentbanned then
 	persistentbanned = Instance.new("StringValue",script)
-	persistentbanned.Name = "padmins"
+	persistentbanned.Name = "pbanned"
 end
 
 --decode and merge persistent admin and banned user tables (all values should be userids)
-if persistenadmins.Value then
-	for _,id in ipairs(rbxutil.DecodeJSON(persistentadmins.Value)) do
-		if not checkifintable(admins,id) then --stop redundancy
-			table.insert(admins,id)
+pcall(function()
+	if persistentadmins.Value then
+		for _,id in ipairs(rbxutil.DecodeJSON(persistentadmins.Value)) do
+			if not checkifintable(admins,id) then --stop redundancy
+				table.insert(admins,id)
+			end
 		end
 	end
-end
-if persistentbanned.Value then
-	for _,id in ipairs(rbxutil.DecodeJSON(persistentbanned.Value)) do
-		if not checkifintable(bannedids,id) then --stop redundancy
-			table.insert(admins,id)
+	if persistentbanned.Value then
+		for _,id in ipairs(rbxutil.DecodeJSON(persistentbanned.Value)) do
+			if not checkifintable(bannedids,id) then --stop redundancy
+				table.insert(admins,id)
+			end
 		end
 	end
-end
+end)
 
 	
 --==========ready
@@ -91,7 +138,7 @@ game:GetService("Players").PlayerAdded:connect(function(player)
 	--initial checks
 	if checkifintable(bannedids,id) and autokick then --auto kick banned players
 		player:Kick() --see u
-	elseif (id == creatorid) or (player:IsBestFriendsWith(creatorid) and adminbffs) or (player:IsFriendsWith(creatorid) and adminfriends) --auto add place owner, best friends, friends
+	elseif (id == creatorid) or (player:IsBestFriendsWith(creatorid) and adminbffs) or (player:IsFriendsWith(creatorid) and adminfriends) then --auto add place owner, best friends, friends
 		if not checkifintable(admins,id) then --stop redundancy
 			table.insert(admins,id)
 		end
@@ -99,13 +146,14 @@ game:GetService("Players").PlayerAdded:connect(function(player)
 	
 	--ready
 	if checkifadmin(player) then
-		--insert admin things here
+		player.Chatted:connect(processcommand) --process all chat by admins
 	end
+	
 end)
 
 --==========api
 function eval(lua)
-	assert(loadstring(lua))()
+	assert(loadstring(x))()
 end
 --[[ ======================================================================= ]]--
 --[[ ==================================GUI================================== ]]--
