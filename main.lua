@@ -7,13 +7,20 @@ local rbxutil = assert(LoadLibrary("RbxUtility"))
 local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
 local creatorid = game.CreatorId
+local modules = script:findFirstChild("modules")
 
 --==========admin commands
 
 --these are the commands
-local commands = {
-	doprint = function(arg,arg2) print(arg,arg2) end
-}
+local commands = {}
+
+--load module commands
+if modules then
+	for i,v in ipairs(modules:GetChildren()) do
+		local module = require(v)
+		commands[module[1]] = module[2]
+	end
+end
 
 --==========functions
 
