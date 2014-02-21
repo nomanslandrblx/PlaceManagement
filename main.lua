@@ -2,10 +2,11 @@
 
 --script accepts both usernames and userids (in case you want to really make sure someone stays admin by checking their userid)
 
-require('config')
+local conf = require('config')
 
 --==========variables
 
+local adminids,bannedids,autokick = conf[1],conf[2],conf[3]
 local rbxutil = assert(LoadLibrary("RbxUtility"))
 local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
