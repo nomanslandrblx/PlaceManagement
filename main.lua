@@ -2,8 +2,8 @@
 
 --script accepts both usernames and userids (in case you want to really make sure someone stays admin by checking their userid)
 
-local adminnames = {"PlusReed", "Oozlebachr", "Enfys", "CoffeeScripter"}
-local adminids = {13135356, 4353611, 36305601, 6110966} -- Did the user change their username? No problem!
+-- local adminnames = {"PlusReed", "Oozlebachr", "Enfys", "CoffeeScripter"}
+local adminids = {13135356, 4353611, 36305601, 6110966}
 local bannednames = {"NowDoTheHarlemShake"}
 local bannedids = {38506985}
 
@@ -13,19 +13,18 @@ local rbxutil = assert(LoadLibrary("RbxUtility"))
 local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
 
---==========config [CS]
-
-local autokick = true -- can be used to write custom ban handlers [CS]
-
 --==========functions
 
 function checkifadmin(player)
 	--check usernames
+	-- i'm commenting this out because I find ID checking more efficient [CS]
+	--[[
 	for i,v in ipairs(admins) do
 		if string.lower(v) == string.lower(player.Name) then
 			return true
 		end
 	end
+	]]
 	--check userids
 	for i,v in ipairs(adminids) do
 		if v == player.userId then
@@ -36,11 +35,14 @@ end
 
 function checkifbanned(player)
 	--check usernames
+	-- i'm commenting this out because I find ID checking more efficient [CS]
+	--[[
 	for i,v in ipairs(bannednames) do
 		if string.lower(v) == string.lower(player.Name) then
 			return true
 		end
 	end
+	]]
 	--check userids
 	for i,v in ipairs(bannedids) do
 		if v == player.userId then
@@ -78,12 +80,9 @@ end
 --==========ready
 
 game:GetService("Players").PlayerAdded:connect(function(player)
-	if autokick == true then
-		if checkifbanned(player) then
-			player:Kick() --see u
-		end
-	end
-	if checkifadmin(player) then
+	if checkifbanned(player) then
+		player:Kick() --see u
+	elseif checkifadmin(player) then
 		--insert admin things here
 	end
 end)
