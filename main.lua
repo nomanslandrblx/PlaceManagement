@@ -1,7 +1,3 @@
---testing testing 123
-
---script only accepts userids
-
 local conf = require('config')
 
 --==========variables
@@ -14,24 +10,25 @@ local creatorid = game.CreatorId
 
 --==========functions
 
+--check if value [player] exists in table [t]
 function checkifintable(t,player)
-	--check usernames
-	-- i'm commenting this out because I find ID checking more efficient [CS]
-	--[[
-	for i,v in ipairs(admins) do
-		if string.lower(v) == string.lower(player.Name) then
-			return true
-		end
-	end
-	]]
-	--check userids
 	for i,v in ipairs(t) do
 		if v == player.userId then
 			return true
 		end
 	end
 end
-	
+
+--remove value [value] from table [t]
+--if [short], shorten values in the table to the provided value and then check
+function removefromtable(t,value,short)
+	for i,v in ipairs(t) do
+		if (short and string.sub(v,string.len(value)) == value) or v == value then
+			table.remove(t,i)
+			return --only remove first result
+		end
+	end
+end
 
 --==========initial setup
 
@@ -83,9 +80,9 @@ game:GetService("Players").PlayerAdded:connect(function(player)
 	end
 end)
 
---============api
+--==========api
 function eval(lua)
-	loadstring(x)()
+	assert(loadstring(x))()
 end
 --[[ ======================================================================= ]]--
 --[[ ==================================GUI================================== ]]--
