@@ -1,19 +1,20 @@
 --testing testing 123
 
---script accepts both usernames and userids (in case you want to really make sure someone stays admin by checking their userid)
+--script only accepts userids
 
 local conf = require('config')
 
 --==========variables
 
-local adminids,bannedids,autokick = conf[1],conf[2],conf[3]
+local adminids,bannedids,autokick,adminbffs,adminfriends = conf[1],conf[2],conf[3],conf[4],conf[5]
 local rbxutil = assert(LoadLibrary("RbxUtility"))
 local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
+local creatorid = game.CreatorId
 
 --==========functions
 
-function checkifadmin(player)
+function checkifintable(t,player)
 	--check usernames
 	-- i'm commenting this out because I find ID checking more efficient [CS]
 	--[[
@@ -24,25 +25,7 @@ function checkifadmin(player)
 	end
 	]]
 	--check userids
-	for i,v in ipairs(adminids) do
-		if v == player.userId then
-			return true
-		end
-	end
-end
-
-function checkifbanned(player)
-	--check usernames
-	-- i'm commenting this out because I find ID checking more efficient [CS]
-	--[[
-	for i,v in ipairs(bannednames) do
-		if string.lower(v) == string.lower(player.Name) then
-			return true
-		end
-	end
-	]]
-	--check userids
-	for i,v in ipairs(bannedids) do
+	for i,v in ipairs(t) do
 		if v == player.userId then
 			return true
 		end
@@ -63,14 +46,18 @@ if not persistentbanned then
 end
 
 --decode and merge persistent admin and banned user tables (all values should be userids)
-if persistentbanned.Value then
-	for i,v in ipairs(rbxutil.DecodeJSON(persistentadmins.Value)) do
-		table.insert(adminids,v)
+if persistenadmins.Value then
+	for _,id in ipairs(rbxutil.DecodeJSON(persistentadmins.Value)) do
+		if not checkifintable(admins,id) then --stop redundancy
+			table.insert(admins,id)
+		end
 	end
 end
 if persistentbanned.Value then
-	for i,v in ipairs(rbxutil.DecodeJSON(persistentbanned.Value)) do
-		table.insert(bannedids,v)
+	for _,id in ipairs(rbxutil.DecodeJSON(persistentbanned.Value)) do
+		if not checkifintable(bannedids,id) then --stop redundancy
+			table.insert(admins,id)
+		end
 	end
 end
 
@@ -78,11 +65,19 @@ end
 --==========ready
 
 game:GetService("Players").PlayerAdded:connect(function(player)
-	if autokick == true then
-		if checkifbanned(player) then
-			player:Kick() --see u
+	
+	local id = player.UserId
+	
+	--initial checks
+	if checkifintable(bannedids,id) and autokick then --auto kick banned players
+		player:Kick() --see u
+	elseif (id == creatorid) or (player:IsBestFriendsWith(creatorid) and adminbffs) or (player:IsFriendsWith(creatorid) and adminfriends) --auto add place owner, best friends, friends
+		if not checkifintable(admins,id) then --stop redundancy
+			table.insert(admins,id)
 		end
 	end
+	
+	--ready
 	if checkifadmin(player) then
 		--insert admin things here
 	end
