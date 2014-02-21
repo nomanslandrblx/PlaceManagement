@@ -1,4 +1,4 @@
 PlaceManagement
 ===============
 
-The project will make managing places much more easier.
+<h3>Simplifying place management.</h3>
