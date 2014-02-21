@@ -10,4 +10,8 @@ local bannedids = {38506985}
 
 local autokick = true -- can be used to write custom ban handlers [CS]
 
+--automatically admin best friends or friends (if they aren't banned)
+local adminbffs = true
+local adminfriends = false
+
 return {adminids,bannedids,autokick}
