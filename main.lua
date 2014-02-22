@@ -95,6 +95,29 @@ function findcommand(command)
 	end
 end
 
+--returns a random string key which can be used to authenticate external commands
+--ex print(genrandomkey())
+--external command system isn't ready yet ~oozle
+local validchars = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+function genrandomkey(segments,segmentlength)
+	if not segments then
+		segments = 6 --default 6
+	end
+	if not segmentlength then
+		segmentlength = 3 --default 3
+	end
+	local key = {}
+	for i=1,segments do
+		local segment = ""
+		for i=1,segmentlength do
+			local char = math.random(1,string.len(validchars))
+			segment = segment..string.sub(validchars,char,char)
+		end
+		table.insert(key,segment)
+	end
+	return table.concat(key,":")
+end
+
 --main function to run commands, processes the string [str]
 --processing: check if command -> split -> find function -> concat arguments -> run function and pass arguments
 --ex processcommand("!doprint hello world")
