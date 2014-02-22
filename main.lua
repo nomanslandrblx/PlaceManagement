@@ -3,7 +3,7 @@ local dshttp = require(script.dshttp)
 
 --==========variables
 
-local adminids,bannedids,autokick,adminbffs,adminfriends,bannedips,usedatastore = conf[1],conf[2],conf[3],conf[4],conf[5],conf[6],conf[7]
+local adminids,bannedids,autokick,adminbffs,adminfriends,usedatastore = conf[1],conf[2],conf[3],conf[4],conf[5],conf[6]
 local rbxutil = assert(LoadLibrary("RbxUtility"))
 local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
