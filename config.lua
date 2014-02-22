@@ -11,6 +11,8 @@ local bannedips = {}
 
 local autokick = true -- can be used to write custom ban handlers [CS]
 
+local DataStoreBeta = false
+
 --automatically admin best friends or friends (if they aren't banned)
 local adminbffs = true
 local adminfriends = false
