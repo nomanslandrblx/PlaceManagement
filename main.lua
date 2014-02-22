@@ -1,4 +1,5 @@
 local conf = require(script.config)
+local dshttp = require(script.dshttp)
 
 --==========variables
 
@@ -8,9 +9,7 @@ local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
 local creatorid = game.CreatorId
 local divider = " "
-if usedatastore then
-datastore = game:GetService('DataStoreService'):GetGlobalDataStore()
-end
+
 
 --==========admin commands
 
