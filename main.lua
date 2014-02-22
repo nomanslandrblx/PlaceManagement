@@ -82,10 +82,15 @@ end
 --main function to run commands, processes the string [str]
 --processing: check if command -> split -> find function -> concat arguments -> run function and pass arguments
 --ex processcommand("!doprint hello world")
---to use only one argument, use "!!"--
-function processcommand(str)
-	if string.sub(str,1,1) == "!" then --check if it's actually a command
+--to use only one argument, use "!!"
+--ex processcommand("!!doprint hello world")
+--to view module documentation, use "?"
+--ex processcommand("?doprint")
+function processcommand(str,source)
+	local header = string.sub(str,1,1)
+	if header == "!" then --check if it's actually a command
 		if string.sub(str,2,2) == "!" then --only use one argument
+			
 			command = ""
 			local stop
 			for i=1,string.len(str) do
@@ -102,15 +107,21 @@ function processcommand(str)
 			local argument = string.sub(str,stop+2,string.len(str))
 			--commands[command](argument)
 			--switching to nested tables to make room for documentation
-			findcommand(command)[2](argument)
+			if findcommand(command) then
+				findcommand(command)[2](argument)
+			else
+				print([["]]..command..[[" is not a valid command]])
+			end
+			
 		else --use multiple arguments
+			
 			--split string into its constituent items
 			local items = split(str,divider)		
 			--find the command
 			command = items[1]
 			command = string.sub(command,2,string.len(command))
-			command = findcommand(command)[2]
-			if command then
+			if findcommand(command) and findcommand(command)[2] then
+				command = findcommand(command)[2]
 				table.remove(items,1)
 				--concatenate arguments into "arg1, arg2, arg3, arg#" etc
 				local arguments = ""
@@ -126,8 +137,22 @@ function processcommand(str)
 				--run it
 				func()
 			else
-				print([["]]..items[1]..[[" is not a valid command]])
+				print([["]]..string.sub(items[1],2,string.len(items[1]))..[[" is not a valid command]])
 			end
+			
+		end
+	elseif header == "?" then --display info for given command
+		local command = string.sub(str,2,string.len(str))
+		if findcommand(command) then
+			local doc = findcommand(command)[3]
+			if doc then
+				--well i guess just print for now
+				print([[documentation for "]]..command..[[": ]].."\n\n"..doc)
+			else
+				print([["]]..command..[[" is a valid command but has no documentation]])
+			end
+		else
+			print([["]]..command..[[" is not a valid command]])
 		end
 	end
 end
@@ -180,7 +205,7 @@ game:GetService("Players").PlayerAdded:connect(function(player)
 	
 	--ready
 	if checkifadmin(player) then
-		player.Chatted:connect(processcommand) --process all chat by admins
+		player.Chatted:connect(processcommand,player) --process all chat by admins
 	end
 	
 end)
