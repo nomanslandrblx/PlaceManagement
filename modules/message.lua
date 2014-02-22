@@ -12,4 +12,9 @@ return {
 		wait(5)
 		message:Destroy()
 	end,
+	[[==========================================
+ Example Message Module by CoffeeScripter 
+   Displays a message using the Message   
+    class that lasts for five seconds.    
+==========================================]]
 }
