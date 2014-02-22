@@ -2,12 +2,15 @@ local conf = require(script.config)
 
 --==========variables
 
-local adminids,bannedids,autokick,adminbffs,adminfriends,bannedips = conf[1],conf[2],conf[3],conf[4],conf[5],conf[6]
+local adminids,bannedids,autokick,adminbffs,adminfriends,bannedips,usedatastore = conf[1],conf[2],conf[3],conf[4],conf[5],conf[6],conf[7]
 local rbxutil = assert(LoadLibrary("RbxUtility"))
 local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
 local creatorid = game.CreatorId
 local divider = " "
+if usedatastore then
+datastore = game:GetService('DataStoreService')
+end
 
 --==========admin commands
 
