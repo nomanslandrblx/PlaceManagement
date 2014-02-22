@@ -11,7 +11,17 @@ local persistentbanned = script:findFirstChild("pbanned")
 local creatorid = game.CreatorId
 local divider = " "
 
-local tips = {'Stay away from Free Models', 'Be prepared for exploiters!'}
+local tips = {
+	'Be careful when using Free Models!',
+	'Be prepared for exploiters!',
+	'Assign Lua library functions to local variables to improve script execution speeds!',
+	'Is something not working like it should, but works fine in solo mode? Try Start Player mode!',
+	'Use Spawn() and Delay() functions to allow a script to proceed while waiting for HTTP data if necessary!',
+	"Remember to add documentation for your code so it's easy to understand if you ever need to go back and fix things!",
+	'Use ModuleScripts to easily manage code that appears in many scripts!',
+	'Using enums to change properties will help your code run faster than using strings!',
+	"Sometimes, it's better to do extra work up front so it's easy to change things later!"
+}
 
 --==========admin commands
 
