@@ -7,17 +7,24 @@ local rbxutil = assert(LoadLibrary("RbxUtility"))
 local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
 local creatorid = game.CreatorId
-local modules = script:findFirstChild("modules")
 local divider = " "
 
 --==========admin commands
 
 --these are the commands
-local commands = {}
+--i included one just for reference and stuff, you can either add commands directly to this table or use the module system ~oozle
+local commands = {
+	{"doexec",
+		function(arg)
+			assert(loadstring(arg))
+		end,
+		"==========doexec by oozlebachr\n\ndoexec is a core command that can be used for reference or testing.\n\ndoexec runs a single argument through loadstring.\n\nex !!doexec print('hello world')"
+	}
+}
 
 --load module commands
-if modules then
-	for i,v in ipairs(modules:GetChildren()) do
+if script:findFirstChild("modules") then
+	for i,v in ipairs(script.modules:GetChildren()) do
 		--local module = require(v)
 		--commands[module[1]] = module[2]
 		--switching to nested tables to make room for documentation ~oozle
