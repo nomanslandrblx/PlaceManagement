@@ -9,7 +9,7 @@ local persistentbanned = script:findFirstChild("pbanned")
 local creatorid = game.CreatorId
 local divider = " "
 if usedatastore then
-datastore = game:GetService('DataStoreService')
+datastore = game:GetService('DataStoreService'):GetGlobalDataStore()
 end
 
 --==========admin commands
