@@ -1,4 +1,4 @@
-local conf = require('config')
+local conf = require(script.config)
 
 --==========variables
 
@@ -8,6 +8,7 @@ local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
 local creatorid = game.CreatorId
 local modules = script:findFirstChild("modules")
+local divider = " "
 
 --==========admin commands
 
@@ -17,8 +18,10 @@ local commands = {}
 --load module commands
 if modules then
 	for i,v in ipairs(modules:GetChildren()) do
-		local module = require(v)
-		commands[module[1]] = module[2]
+		--local module = require(v)
+		--commands[module[1]] = module[2]
+		--switching to nested tables to make room for documentation ~oozle
+		table.insert(commands,require(v))
 	end
 end
 
@@ -66,42 +69,66 @@ function split(str,div)
 	return results
 end
 
+--find the given command [command] and returns it
+--ex findcommand("doprint")("hello world")
+function findcommand(command)
+	for i,v in ipairs(commands) do
+		if v[1] == command then
+			return v
+		end
+	end
+end
+
 --main function to run commands, processes the string [str]
 --processing: check if command -> split -> find function -> concat arguments -> run function and pass arguments
 --ex processcommand("!doprint hello world")
+--to use only one argument, use "!!"--
 function processcommand(str)
 	if string.sub(str,1,1) == "!" then --check if it's actually a command
-		
-		--split string into its constituent items
-		local items = split(str," ")		
-		
-		--find the command
-		command = items[1]
-		command = string.sub(command,2,string.len(command))
-		command = commands[command]
-		
-		if command then
-			table.remove(items,1)
-			
-			--concatenate arguments into "arg1, arg2, arg3, arg#" etc
-			local arguments = ""
-			for _,arg in ipairs(items) do
-				arguments = arguments..[["]]..arg..[[",]]
+		if string.sub(str,2,2) == "!" then --only use one argument
+			command = ""
+			local stop
+			for i=1,string.len(str) do
+				local char = string.sub(str,i,i)
+				if char ~= "!" then
+					if char == divider then
+						break
+					else
+						command = command..char
+					end
+				end
+				stop = i
 			end
-			
-			--assemble the parts
-			local arguments = "("..string.sub(arguments,1,string.len(arguments)-1)..")"
-			
-			--loadstring it
-			local func = function() assert(loadstring("command"..arguments))() end
-			
-			--run it
-			func()
-			
-		else
-			print([["]]..items[1]..[[" is not a valid command]])
+			local argument = string.sub(str,stop+2,string.len(str))
+			--commands[command](argument)
+			--switching to nested tables to make room for documentation
+			findcommand(command)[2](argument)
+		else --use multiple arguments
+			--split string into its constituent items
+			local items = split(str,divider)		
+			--find the command
+			command = items[1]
+			command = string.sub(command,2,string.len(command))
+			command = findcommand(command)[2]
+			if command then
+				table.remove(items,1)
+				--concatenate arguments into "arg1, arg2, arg3, arg#" etc
+				local arguments = ""
+				for _,arg in ipairs(items) do
+					arguments = arguments..[["]]..arg..[[",]]
+				end
+				--assemble the parts
+				local arguments = "("..string.sub(arguments,1,string.len(arguments)-1)..")"
+				--loadstring it
+				--local func = assert(loadstring("command"..arguments))
+				--switching to nested tables to make room for documentation
+				local func = assert(loadstring("command"..arguments))
+				--run it
+				func()
+			else
+				print([["]]..items[1]..[[" is not a valid command]])
+			end
 		end
-
 	end
 end
 
@@ -157,6 +184,14 @@ game:GetService("Players").PlayerAdded:connect(function(player)
 	end
 	
 end)
+
+--for studio testing
+local v = script:findFirstChild("runcommand")
+if not v then
+	v = Instance.new("StringValue",script)
+	v.Name = "runcommand"
+end
+v.Changed:connect(processcommand)
 
 --==========api
 function eval(lua)
