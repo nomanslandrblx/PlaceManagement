@@ -19,7 +19,7 @@ local tips = {'Stay away from Free Models', 'Be prepared for exploiters!'}
 local commands = {
 	{"doexec",
 		function(arg)
-			assert(loadstring(arg))
+			assert(loadstring(arg))()
 		end,
 		"==========doexec by oozlebachr\n\ndoexec is a core command that can be used for reference or testing.\n\ndoexec runs a single argument through loadstring.\n\nex !!doexec print('hello world')"
 	}
