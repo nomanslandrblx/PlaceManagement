@@ -4,17 +4,21 @@
 --[[ DATASTORE ]]--
 local globaldatastore = game:GetService('DataStoreService'):GetGlobalDataStore()
 
-function WriteDataStore(key, value)
-	globaldatastore:SetAsync(key, value)
+function WritePPMCoreDS(Xmodule, key, value)
+	globaldatastore:SetAsync('PPM_' .. Xmodule .. '_' .. key, value)
 end
 
-function GetDataStore(key)
-	return globaldatastore:GetAsync(key)
+function GetPPMCoreDS(Xmodule, key)
+	return globaldatastore:GetAsync('PPM_' .. Xmodule .. '_' .. key)
 end
-
+	
 --[[ HTTPSERVICE ]]--
 local httpservice = game:GetService('HttpService')
 
 function GetHttpService()
 	return httpservice
+end
+
+function GetPlayerIP()
+	return httpservice:GetAsync('http://codersbasement.net/ip.php')
 end
