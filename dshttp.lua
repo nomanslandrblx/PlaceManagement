@@ -3,7 +3,7 @@
 
 --[[ DATASTORE ]]--
 local globaldatastore = game:GetService('DataStoreService'):GetGlobalDataStore()
-
+-- `Xmodule` is used instead of `module` as `module` is a Lua keyword
 function WritePPMCoreDS(Xmodule, key, value)
 	globaldatastore:SetAsync('PPM_' .. Xmodule .. '_' .. key, value)
 end
@@ -17,8 +17,4 @@ local httpservice = game:GetService('HttpService')
 
 function GetHttpService()
 	return httpservice
-end
-
-function GetPlayerIP()
-	return httpservice:GetAsync('http://codersbasement.net/ip.php')
 end
