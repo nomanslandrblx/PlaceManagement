@@ -1,3 +1,4 @@
+local PPM = {}
 local conf = require(script.config)
 local dshttp = require(script.dshttp)
 
@@ -11,8 +12,6 @@ local creatorid = game.CreatorId
 local divider = " "
 
 local tips = {'Stay away from Free Models', 'Be prepared for exploiters!'}
-
-local PPM = {}
 
 --==========admin commands
 
