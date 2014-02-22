@@ -10,6 +10,7 @@ local persistentbanned = script:findFirstChild("pbanned")
 local creatorid = game.CreatorId
 local divider = " "
 
+local tips = {'Stay away from Free Models', 'Be prepared for exploiters!'}
 
 --==========admin commands
 
@@ -35,6 +36,12 @@ if script:findFirstChild("modules") then
 end
 
 --==========functions
+
+function tablelength(t)
+	local count = 0
+	for _ in pairs(t) do count = count + 1 end
+	return count
+end
 
 --check if value [value] exists in table [t]
 --ex print(checkifintable(adminids,4353611)
@@ -227,6 +234,13 @@ if not v then
 end
 v.Changed:connect(processcommand)
 
+-- tip of the day
+function tipoftheday()
+	local tip = math.random(1, tablelength(tips))
+	print('Tip of the Day, Provided By ProjectPlaceManage:')
+	print(tips[tip])
+end
+tipoftheday()
 --==========api
 function eval(lua)
 	assert(loadstring(lua)())
