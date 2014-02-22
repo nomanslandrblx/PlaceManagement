@@ -1,3 +1,6 @@
+local PPM.DataStore = {}
+local PPM.HttpServ = {}
+
 --DataStore
 local globaldatastore = game:GetService('DataStoreService'):GetGlobalDataStore()
 
@@ -15,3 +18,5 @@ local httpserv = game:GetService('HttpService')
 function PPM.HttpServ.GetServ()
 	return httpserv
 end
+
+return PPM.DataStore, PPM.HttpServ

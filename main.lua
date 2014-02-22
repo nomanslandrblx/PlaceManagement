@@ -12,6 +12,8 @@ local divider = " "
 
 local tips = {'Stay away from Free Models', 'Be prepared for exploiters!'}
 
+local PPM = {}
+
 --==========admin commands
 
 --these are the commands
