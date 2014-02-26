@@ -1,5 +1,23 @@
 local PPM = {}
 
+--[[
+	==========table of contents==========
+	
+	1. variables
+	
+	2. admin commands
+	
+	3. datastore and http functions
+	
+	4. command processing cunctions
+	
+	5. initial setup
+	
+	6. ready
+	
+	7. api (?)
+]]
+
 --==========variables
 
 --import settings
@@ -251,7 +269,6 @@ pcall(function()
 	end
 end)
 
-	
 --==========ready
 
 game:GetService("Players").PlayerAdded:connect(function(player)
@@ -280,15 +297,20 @@ if not v then
 	v = Instance.new("StringValue",script)
 	v.Name = "runcommand"
 end
-v.Changed:connect(processcommand)
+v.Changed:connect(function()
+	processcommand(v.Value)
+	v.Value = "ready"
+end)
 
 -- tip of the day
 print("Tip of the Day, Provided By ProjectPlaceManage:\n"..tips[math.random(#tips)])
 
 --==========api
+--[[commented out because this is available using findcommand("doexec")(source here) ~oozle
 function eval(lua)
 	assert(loadstring(lua)())
 end
+]]
 --[[ ======================================================================= ]]--
 --[[ ==================================GUI================================== ]]--
 --[[ ======================================================================= ]]--
