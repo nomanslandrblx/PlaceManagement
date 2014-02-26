@@ -1,16 +1,25 @@
 local PPM = {}
-local conf = require(script.config)
-local dshttp = require(script.dshttp)
 
 --==========variables
 
+--import settings
+local conf = require(script.config)
 local adminids,bannedids,autokick,adminbffs,adminfriends,usedatastore = conf[1],conf[2],conf[3],conf[4],conf[5],conf[6]
+
+--libraries
 local rbxutil = assert(LoadLibrary("RbxUtility"))
+
+--services
+local globaldatastore = game:GetService('DataStoreService'):GetGlobalDataStore()
+local httpservice = game:GetService('HttpService')
+
+--instances
 local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
+
+--constants
 local creatorid = game.CreatorId
 local divider = " "
-
 local tips = {
 	'Be careful when using Free Models!',
 	'Be prepared for exploiters!',
@@ -46,7 +55,17 @@ if script:findFirstChild("modules") then
 	end
 end
 
---==========functions
+--==========datastore and http functions
+
+function datastorewrite(module_, key, value)
+	globaldatastore:WriteAsync('PPM_' .. module_ .. '_' .. key, value)
+end
+
+function detastoreget(module_, key)
+	globaldatastore:GetAsync('PPM_' .. module_ .. '_' .. key)
+end
+
+--==========comomand processing functions
 
 --check if value [value] exists in table [t]
 --if [short], shorten values in the table to the length of the provided value and then check
