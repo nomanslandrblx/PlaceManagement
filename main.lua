@@ -61,7 +61,7 @@ function datastorewrite(module_, key, value)
 	globaldatastore:WriteAsync('PPM_' .. module_ .. '_' .. key, value)
 end
 
-function detastoreget(module_, key)
+function datastoreget(module_, key)
 	globaldatastore:GetAsync('PPM_' .. module_ .. '_' .. key)
 end
 
