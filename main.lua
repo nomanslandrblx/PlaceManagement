@@ -37,6 +37,8 @@ local persistentbanned = script:findFirstChild("pbanned")
 
 --constants
 local creatorid = game.CreatorId
+local runcommand = "!" --to use a single argument, use this symbol twice. ex: "!" -> "!!command"
+local viewcommanddocumentation = "?"
 local divider = " "
 local tips = {
 	'Be careful when using Free Models!',
@@ -170,14 +172,14 @@ end
 --ex processcommand("?doprint")
 function processcommand(str,source)
 	local header = string.sub(str,1,1)
-	if header == "!" then --check if it's actually a command
-		if string.sub(str,2,2) == "!" then --only use one argument
+	if header == runcommand then --check if it's actually a command
+		if string.sub(str,2,2) == runcommand then --only use one argument
 			
 			command = ""
 			local stop
 			for i=1,string.len(str) do
 				local char = string.sub(str,i,i)
-				if char ~= "!" then
+				if char ~= runcommand then
 					if char == divider then
 						break
 					else
@@ -223,7 +225,7 @@ function processcommand(str,source)
 			end
 			
 		end
-	elseif header == "?" then --display info for given command
+	elseif header == viewcommanddocumentation then --display info for given command
 		local command = string.sub(str,2,string.len(str))
 		if findcommand(command) then
 			local doc = findcommand(command)[3]
