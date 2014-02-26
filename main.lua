@@ -36,9 +36,10 @@ local persistentadmins = script:findFirstChild("padmins")
 local persistentbanned = script:findFirstChild("pbanned")
 
 --constants
+local numorigcommands
 local creatorid = game.CreatorId
 local runcommand = "!" --to use a single argument, use this symbol twice. ex: "!" -> "!!command"
-local viewcommanddocumentation = "?"
+local viewcommanddocumentation = "?" --use this symbol twice to view all available commands
 local divider = " "
 local tips = {
 	'Be careful when using Free Models!',
@@ -64,6 +65,9 @@ local commands = {
 		"==========doexec by oozlebachr\n\ndoexec is a core command that can be used for reference or testing.\n\ndoexec runs a single argument through loadstring.\n\nex !!doexec print('hello world')"
 	}
 }
+
+--save original command count
+numorigcommands = #commands
 
 --load module commands
 if script:findFirstChild("modules") then
@@ -225,18 +229,32 @@ function processcommand(str,source)
 			end
 			
 		end
-	elseif header == viewcommanddocumentation then --display info for given command
-		local command = string.sub(str,2,string.len(str))
-		if findcommand(command) then
-			local doc = findcommand(command)[3]
-			if doc then
-				--well i guess just print for now
-				print([[documentation for "]]..command..[[": ]].."\n\n"..doc)
-			else
-				print([["]]..command..[[" is a valid command but has no documentation]])
+		
+	elseif header == viewcommanddocumentation then --display info
+		if string.sub(str,2,2) == viewcommanddocumentation then --display all commands
+			local corecommands = {}
+			local modulecommands = {}
+			for i,v in ipairs(commands) do
+				if i <= numorigcommands then
+					table.insert(corecommands,v[1])
+				else
+					table.insert(modulecommands,v[1])
+				end
 			end
-		else
-			print([["]]..command..[[" is not a valid command]])
+			print("core commands:\n"..table.concat(corecommands,", ").."\nmodule commands:\n"..table.concat(modulecommands,", "))
+		else --display info for given command
+			local command = string.sub(str,2,string.len(str))
+			if findcommand(command) then
+				local doc = findcommand(command)[3]
+				if doc then
+					--well i guess just print for now
+					print([[documentation for "]]..command..[[": ]].."\n\n"..doc)
+				else
+					print([["]]..command..[[" is a valid command but has no documentation]])
+				end
+			else
+				print([["]]..command..[[" is not a valid command]])
+			end
 		end
 	end
 end
