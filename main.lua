@@ -48,12 +48,6 @@ end
 
 --==========functions
 
-function tablelength(t)
-	local count = 0
-	for _ in pairs(t) do count = count + 1 end
-	return count
-end
-
 --check if value [value] exists in table [t]
 --ex print(checkifintable(adminids,4353611)
 function checkifintable(t,value)
@@ -269,12 +263,8 @@ end
 v.Changed:connect(processcommand)
 
 -- tip of the day
-function tipoftheday()
-	local tip = math.random(1, tablelength(tips))
-	print('Tip of the Day, Provided By ProjectPlaceManage:')
-	print(tips[tip])
-end
-tipoftheday()
+print("Tip of the Day, Provided By ProjectPlaceManage:\n"..tips[math.random(#tips)])
+
 --==========api
 function eval(lua)
 	assert(loadstring(lua)())
