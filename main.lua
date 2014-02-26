@@ -49,21 +49,22 @@ end
 --==========functions
 
 --check if value [value] exists in table [t]
+--if [short], shorten values in the table to the length of the provided value and then check
 --ex print(checkifintable(adminids,4353611)
-function checkifintable(t,value)
+function checkifintable(t,value,short)
 	for i,v in ipairs(t) do
-		if v == value then
+		if (short and string.sub(v,1,string.len(value)) == value) or v == value then
 			return true
 		end
 	end
 end
 
 --remove value [value] from table [t]
---if [short], shorten values in the table to the provided value and then check
+--if [short], shorten values in the table to the length of provided value and then check
 --ex removefromtable(adminids,4353611) print(checkifintable(adminids,4353611)
 function removefromtable(t,value,short)
 	for i,v in ipairs(t) do
-		if (short and string.sub(v,string.len(value)) == value) or v == value then
+		if (short and string.sub(v,1,string.len(value)) == value) or v == value then
 			table.remove(t,i)
 			return --only remove first result
 		end
