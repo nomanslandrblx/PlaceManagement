@@ -275,8 +275,8 @@ end
 pcall(function()
 	if persistentadmins.Value then
 		for _,id in ipairs(rbxutil.DecodeJSON(persistentadmins.Value)) do
-			if not checkifintable(admins,id) then --stop redundancy
-				table.insert(admins,id)
+			if not checkifintable(adminids,id) then --stop redundancy
+				table.insert(adminids,id)
 			end
 		end
 	end
