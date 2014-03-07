@@ -12,6 +12,11 @@ local autokick = true -- can be used to write custom ban handlers [CS]
 local adminbffs = true
 local adminfriends = false
 
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--NOTE: needs a copy of http://www.roblox.com/placemanagement-gui-item?id=148812527 present inside the script
+--(we can package this later) ~oozle
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 --[[
 	==========table of contents==========
 	
