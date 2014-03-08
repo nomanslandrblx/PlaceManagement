@@ -12,11 +12,6 @@ local autokick = true -- can be used to write custom ban handlers [CS]
 local adminbffs = true
 local adminfriends = false
 
---!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
---NOTE: needs a copy of http://www.roblox.com/placemanagement-gui-item?id=148812527 present inside the script
---(we can package this later) ~oozle
---!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 --[[
 	==========table of contents==========
 	
@@ -55,6 +50,7 @@ local rbxutil = assert(LoadLibrary("RbxUtility"))
 --services
 local globaldatastore = game:GetService('DataStoreService'):GetGlobalDataStore()
 local httpservice = game:GetService('HttpService')
+local players = game:GetService("Players")
 
 --instances
 local persistentadmins = script:findFirstChild("padmins")
@@ -89,6 +85,17 @@ local commands = {
 			assert(loadstring(arg))()
 		end,
 		"==========doexec by oozlebachr\n\ndoexec is a core command that can be used for reference or testing.\n\ndoexec runs a single argument through loadstring.\n\nex !!doexec print('hello world')"
+	},
+	{"givegui",
+		function(player)
+			local p = game.Players:findFirstChild(player)
+			if p then
+				setupgui(p)
+			else
+				print("player "..player.." not found")
+			end
+		end,
+		"==========givegui by oozlebachr\n\ngive the place management frontend gui to a specified player"
 	}
 }
 
@@ -123,7 +130,7 @@ end
 function checkifintable(t,value,short)
 	for i,v in ipairs(t) do
 		if (short and string.sub(v,1,string.len(value)) == value) or v == value then
-			return true
+			return v
 		end
 	end
 end
@@ -317,150 +324,159 @@ end)
 
 --==========gui manager function
 
+--function to set up and manage a gui for a given player
 --gui autoconfigures itself and stuff. enjoy !! ~oozle :)
-function setupgui(player)
-	if player and not player.PlayerGui:findFirstChild("PlaceManagementGui") then
-		Spawn(function()
-			--variables
-			local gui = guibase:clone()
-			gui.Parent = player.PlayerGui
-			gui = gui.Main --variable reusing yay :)
-			local selectionframe = gui.SelectionArea.SelectionFrame
-			local commandframe = selectionframe.CommandFrame
-			local descriptionframe = gui.SelectionArea.DescriptionFrame
-			
-			local descriptionscroll = 0
-			local descriptionscrollspeed = 10
-			local descriptionscrollmax = 980-descriptionscrollspeed
-			
-			local commandscroll = 0
-			local commandscrollspeed = 20
-			local commandscrollmax = 20*(#commands-1)
-			
-			local commandmode = 1 --1 = !; 2 = !!
-			local currentcommand = nil
-			
-			--new instances
-			local commandbuttonbase = commandframe.CommandButton:clone()
-			commandframe.CommandButton:Destroy()
-			
-			
-			--==========precursor functions
-			
-			function updatecommandscrolling()
-				if commandscroll < 0 then --too far up
-					commandscroll = 0
-				elseif commandscroll > commandscrollmax then --too far down
-					commandscroll = commandscrollmax
-				else
-					commandframe.Position = UDim2.new(0,0,0,-commandscroll)
-				end
-			end
-			
-			function updatedescriptionscrolling()
-				if descriptionscroll < 0 then --too far up
-					descriptionscroll = 0
-				elseif descriptionscroll > descriptionscrollmax then --too far down
-					descriptionscroll = descriptionscrollmax
-				else
-					descriptionframe.Description.Position = UDim2.new(0,0,0,-descriptionscroll)
-				end
-			end
-			
-			function updatedescription()
-				if currentcommand then
-					local command = currentcommand[1]
-					local doc = currentcommand[3]
-					if doc then --display documentation
-						descriptionframe.Description.Text = [[Documentation for "]]..command..[[": ]].."\n\n"..doc
+function setupgui()
+	print("error:\nno gui base found\nneeds a copy of http://www.roblox.com/--item?id=148812527 present inside the script to use the management gui")
+end
+if guibase then
+	setupgui = function(player)
+		if player and not player.PlayerGui:findFirstChild("PlaceManagementGui") then
+			Spawn(function()
+				--variables
+				local gui = guibase:clone()
+				gui.Parent = player.PlayerGui
+				gui = gui.Main --variable reusing yay :)
+				local selectionframe = gui.SelectionArea.SelectionFrame
+				local commandframe = selectionframe.CommandFrame
+				local descriptionframe = gui.SelectionArea.DescriptionFrame
+				
+				local descriptionscroll = 0
+				local descriptionscrollspeed = 10
+				local descriptionscrollmax = 980-descriptionscrollspeed
+				
+				local commandscroll = 0
+				local commandscrollspeed = 20
+				local commandscrollmax = 20*(#commands-1)
+				
+				local commandmode = 1 --1 = !; 2 = !!
+				local currentcommand = nil
+				
+				--new instances
+				local commandbuttonbase = commandframe.CommandButton:clone()
+				commandframe.CommandButton:Destroy()
+				
+				
+				--==========precursor functions
+				
+				function updatecommandscrolling()
+					if commandscroll < 0 then --too far up
+						commandscroll = 0
+					elseif commandscroll > commandscrollmax then --too far down
+						commandscroll = commandscrollmax
 					else
-						descriptionframe.Description.Text = [["]]..command..[[" has no documentation. Sorry!]]
+						commandframe.Position = UDim2.new(0,0,0,-commandscroll)
 					end
-					descriptionscroll = 0 --reset scrolling
-					updatedescriptionscrolling()
-				else
-					descriptionframe.Description.Text = "No command selected.\n\nClick a command above to view documentation and/or use it!\n\nYou can scroll using the up and down arrows at the right."
 				end
-			end
-			
-			--==========set up gui
-			
-			--generate a button for each command
-			for i,command in ipairs(commands) do
-				local newbutton = commandbuttonbase:clone()
-				newbutton.Parent = commandframe
-				newbutton.Text = i.." "..command[1]
-				newbutton.Position = UDim2.new(0,0,0,20*(i-1))
-				if i%2 == 0 then --help distinguish between the buttons
-					local color = newbutton.BackgroundColor3
-					newbutton.BackgroundColor3 = Color3.new(color.r+30,color.g+30,color.b+30)
+				
+				function updatedescriptionscrolling()
+					if descriptionscroll < 0 then --too far up
+						descriptionscroll = 0
+					elseif descriptionscroll > descriptionscrollmax then --too far down
+						descriptionscroll = descriptionscrollmax
+					else
+						descriptionframe.Description.Position = UDim2.new(0,0,0,-descriptionscroll)
+					end
 				end
-				newbutton.MouseButton1Down:connect(function()
-					currentcommand = command
-					updatedescription()
+				
+				function updatedescription()
+					if currentcommand then
+						local command = currentcommand[1]
+						local doc = currentcommand[3]
+						if doc then --display documentation
+							descriptionframe.Description.Text = [[Documentation for "]]..command..[[": ]].."\n\n"..doc
+						else
+							descriptionframe.Description.Text = [["]]..command..[[" has no documentation. Sorry!]]
+						end
+						descriptionscroll = 0 --reset scrolling
+						updatedescriptionscrolling()
+					else
+						descriptionframe.Description.Text = "No command selected.\n\nClick a command above to view documentation and/or use it!\n\nYou can scroll using the up and down arrows at the right."
+					end
+				end
+				
+				--==========set up gui
+				
+				--generate a button for each command
+				for i,command in ipairs(commands) do
+					local newbutton = commandbuttonbase:clone()
+					newbutton.Parent = commandframe
+					newbutton.Text = i.." "..command[1]
+					newbutton.Position = UDim2.new(0,0,0,20*(i-1))
+					if i%2 == 1 then --help distinguish between the buttons
+						newbutton.BackgroundTransparency = newbutton.BackgroundTransparency - 0.1
+					end
+					newbutton.MouseButton1Down:connect(function()
+						currentcommand = command
+						for i,v in ipairs(commandframe:GetChildren()) do --make everything green
+							v.BackgroundColor3 = BrickColor.new("Bright green").Color
+						end
+						newbutton.BackgroundColor3 = BrickColor.new("Br. yellowish green").Color --make this diff color
+						updatedescription()
+					end)
+				end
+				
+				--display blank description
+				updatedescription()
+				
+				--==========ready
+				
+				--connect to command scrolling
+				selectionframe.ScrollDownButton.MouseButton1Down:connect(function()
+					commandscroll = commandscroll + commandscrollspeed
+					updatecommandscrolling()
 				end)
-			end
-			
-			--display blank description
-			updatedescription()
-			
-			--==========ready
-			
-			--connect to command scrolling
-			selectionframe.ScrollDownButton.MouseButton1Down:connect(function()
-				commandscroll = commandscroll + commandscrollspeed
-				updatecommandscrolling()
-			end)
-			selectionframe.ScrollUpButton.MouseButton1Down:connect(function()
-				commandscroll = commandscroll - commandscrollspeed
-				updatecommandscrolling()
-			end)
-			
-			--connect to description scrolling
-			descriptionframe.ScrollDownButton.MouseButton1Down:connect(function()
-				descriptionscroll = descriptionscroll + descriptionscrollspeed
-				updatedescriptionscrolling()
-			end)
-			descriptionframe.ScrollUpButton.MouseButton1Down:connect(function()
-				descriptionscroll = descriptionscroll - descriptionscrollspeed
-				updatedescriptionscrolling()
-			end)
-			
-			--connect to mode changing
-			gui.CommandModeButton.MouseButton1Down:connect(function()
-				commandmode = (commandmode%2)+1
-				if commandmode == 1 then
-					gui.CommandModeButton.Text = "Current input mode: [!] Multiple arguments separated by spaces (click to change)"
-				else
-					gui.CommandModeButton.Text = "Current input mode: [!!] Single argument (click to change)"
-				end
-			end)
-			
-			--connect to the input button and process the commands
-			gui.InputButton.MouseButton1Down:connect(function()
-				if currentcommand then
-					local prefix = ""
+				selectionframe.ScrollUpButton.MouseButton1Down:connect(function()
+					commandscroll = commandscroll - commandscrollspeed
+					updatecommandscrolling()
+				end)
+				
+				--connect to description scrolling
+				descriptionframe.ScrollDownButton.MouseButton1Down:connect(function()
+					descriptionscroll = descriptionscroll + descriptionscrollspeed
+					updatedescriptionscrolling()
+				end)
+				descriptionframe.ScrollUpButton.MouseButton1Down:connect(function()
+					descriptionscroll = descriptionscroll - descriptionscrollspeed
+					updatedescriptionscrolling()
+				end)
+				
+				--connect to mode changing
+				gui.CommandModeButton.MouseButton1Down:connect(function()
+					commandmode = (commandmode%2)+1
 					if commandmode == 1 then
-						prefix = "!"
+						gui.CommandModeButton.Text = "Current input mode: [!] Multiple arguments separated by spaces (click to change)"
 					else
-						prefix = "!!"
+						gui.CommandModeButton.Text = "Current input mode: [!!] Single argument (click to change)"
 					end
-					print(prefix..currentcommand[1].." "..gui.InputField.Text)
-					processcommand(prefix..currentcommand[1].." "..gui.InputField.Text)
-				end
+				end)
+				
+				--connect to the input button and process the commands
+				gui.InputButton.MouseButton1Down:connect(function()
+					if currentcommand then
+						local prefix = ""
+						if commandmode == 1 then
+							prefix = "!"
+						else
+							prefix = "!!"
+						end
+						print(prefix..currentcommand[1].." "..gui.InputField.Text)
+						processcommand(prefix..currentcommand[1].." "..gui.InputField.Text)
+					end
+				end)
+				
+				print("ready setting up gui for "..player.Name)			
+				
 			end)
-			
-			print("ready setting up gui for "..player.Name)			
-			
-		end)
-	else
-		print("player "..player.Name.." already has a gui")
+		else
+			print("player "..player.Name.." already has a gui")
+		end
 	end
 end
 
 --==========ready
 
-game:GetService("Players").PlayerAdded:connect(function(player)
+players.PlayerAdded:connect(function(player)
 	
 	local id = player.userId
 	print(player.Name..", userid "..id.." has joined")
