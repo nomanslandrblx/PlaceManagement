@@ -354,6 +354,7 @@ if guibase then
 	setupgui = function(player)
 		if player and not player.PlayerGui:findFirstChild("PlaceManagementGui") then
 			Spawn(function()
+				
 				--variables
 				local gui = guibase:clone()
 				gui.Parent = player.PlayerGui
@@ -369,6 +370,10 @@ if guibase then
 				local commandscroll = 0
 				local commandscrollspeed = 20
 				local commandscrollmax = 20*(#commands-1)
+				
+				local resizing = false
+				local minx = 200
+				local miny = 150
 				
 				local commandmode = 1 --1 = !; 2 = !!
 				local currentcommand = nil
@@ -483,6 +488,43 @@ if guibase then
 						end
 						print(prefix..currentcommand[1].." "..gui.InputField.Text)
 						processcommand(prefix..currentcommand[1].." "..gui.InputField.Text,player.Name.."'s frontend gui")
+					end
+				end)
+				
+				--resizing
+				gui.ResizeButton.MouseButton1Down:connect(function()
+					resizing = true
+				end)
+				gui.ResizeButton.MouseLeave:connect(function()
+					resizing = false
+				end)
+				gui.ResizeButton.MouseButton1Up:connect(function()
+					resizing = false
+				end)
+				gui.ResizeButton.MouseMoved:connect(function(x,y)
+					if resizing then
+						
+						--center mouse
+						x = x+(gui.ResizeButton.AbsoluteSize.X/4)
+						y = y+(gui.ResizeButton.AbsoluteSize.Y/4)
+						
+						--limit horizontal
+						if gui.AbsoluteSize.X < minx then
+							x = nil
+						else
+							x = x-gui.AbsolutePosition.X
+						end
+						
+						--limit vertical
+						if gui.AbsoluteSize.Y < miny then
+							y = nil
+						else
+							y = y-gui.AbsolutePosition.Y
+						end
+						
+						--resize
+						gui.Size = UDim2.new(0,(x or gui.AbsoluteSize.X),0,(y or gui.AbsoluteSize.Y))
+						
 					end
 				end)
 				
