@@ -75,17 +75,28 @@ local tips = {
 	"Sometimes, it's better to do extra work up front so it's easy to change things later!"
 }
 
+--logging
+local logs = {}
+
 --==========admin commands
 
 --these are the commands
 --i included one just for reference and stuff, you can either add commands directly to this table or use the module system ~oozle
 local commands = {
+	{"helloworld",
+		function()
+			print("hello world")
+		end,
+		"hello, world !!\n\nthank you for choosing placemanagement! :)\n\nthis is a placeholder command"
+	}
+	,
 	{"doexec",
 		function(arg)
 			assert(loadstring(arg))()
 		end,
 		"==========doexec by oozlebachr\n\ndoexec is a core command that can be used for reference or testing.\n\ndoexec runs a single argument through loadstring.\n\nex !!doexec print('hello world')"
-	},
+	}
+	,
 	{"givegui",
 		function(player)
 			local p = game.Players:findFirstChild(player)
@@ -200,7 +211,7 @@ function genrandomkey(segments,segmentlength)
 	return table.concat(key,":")
 end
 
---main function to run commands, processes the string [str]
+--main function to run commands, processes the string [str] and prints the string [source]
 --processing: check if command -> split -> find function -> concat arguments -> run function and pass arguments
 --ex processcommand("!doprint hello world")
 --to use only one argument, use "!!"
@@ -210,6 +221,11 @@ end
 function processcommand(str,source)
 	local header = string.sub(str,1,1)
 	if header == runcommand then --check if it's actually a command
+		
+		local logged = (source or "undefined source")..": "..str
+		table.insert(logs,logged) --log the command
+		print(logged) --print the command
+		
 		if string.sub(str,2,2) == runcommand then --only use one argument
 			
 			command = ""
@@ -264,7 +280,9 @@ function processcommand(str,source)
 		end
 		
 	elseif header == viewcommanddocumentation then --display info
+		
 		if string.sub(str,2,2) == viewcommanddocumentation then --display all commands
+	
 			local corecommands = {}
 			local modulecommands = {}
 			for i,v in ipairs(commands) do
@@ -275,7 +293,9 @@ function processcommand(str,source)
 				end
 			end
 			print("core commands:\n"..table.concat(corecommands,", ").."\nmodule commands:\n"..table.concat(modulecommands,", "))
+		
 		else --display info for given command
+		
 			local command = string.sub(str,2,string.len(str))
 			if findcommand(command) then
 				local doc = findcommand(command)[3]
@@ -288,6 +308,7 @@ function processcommand(str,source)
 			else
 				print([["]]..command..[[" is not a valid command]])
 			end
+			
 		end
 	end
 end
@@ -461,7 +482,7 @@ if guibase then
 							prefix = "!!"
 						end
 						print(prefix..currentcommand[1].." "..gui.InputField.Text)
-						processcommand(prefix..currentcommand[1].." "..gui.InputField.Text)
+						processcommand(prefix..currentcommand[1].." "..gui.InputField.Text,player.Name.."'s frontend gui")
 					end
 				end)
 				
@@ -493,7 +514,7 @@ players.PlayerAdded:connect(function(player)
 	--ready
 	if checkifintable(adminids,id) then
 		print(player.Name.." is an admin")
-		player.Chatted:connect(processcommand,player) --process all chat by admins
+		player.Chatted:connect(processcommand,player.Name) --process all chat by admins
 		player.CharacterAdded:connect(function()
 			repeat wait() until player.Character:findFirstChild("Head")
 			wait(.5)
