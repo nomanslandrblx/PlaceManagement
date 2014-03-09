@@ -6,9 +6,9 @@
 
 return {
 	"message",
-	function(text)
+	function(...)
 		local message = Instance.new('Message', game.Workspace)
-		message.Text = text
+		message.Text = table.concat({...}," ")
 		wait(5)
 		message:Destroy()
 	end,
