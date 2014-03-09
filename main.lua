@@ -63,6 +63,8 @@ local creatorid = game.CreatorId
 local runcommand = "!" --to use a single argument, use this symbol twice. ex: "!" -> "!!command"
 local viewcommanddocumentation = "?" --use this symbol twice to view all available commands
 local divider = " "
+local openbracket = string.char(91)
+local closedbracket = string.char(93)
 local tips = {
 	'Be careful when using Free Models!',
 	'Be prepared for exploiters!',
@@ -104,10 +106,13 @@ Happy administrating!
 	}
 	,
 	{"doexec",
-		function(arg)
-			assert(loadstring(arg))()
+		function(...)
+			local source = table.concat({...}," ") --pack all the arguments into one string
+			Spawn(function()
+				assert(loadstring(source))()
+			end)
 		end,
-		"==========doexec by oozlebachr\n\ndoexec is a core command that can be used for reference or testing.\n\ndoexec runs a single argument through loadstring.\n\nex !!doexec print('hello world')"
+		"==========doexec by oozlebachr\n\ndoexec is a core command that can be used for reference or testing.\n\ndoexec runs a single argument through loadstring.\n\nex !doexec print('hello world')\n\ncannot use double brackets"
 	}
 	,
 	{"givegui",
@@ -239,7 +244,10 @@ function processcommand(str,source)
 		table.insert(logs,logged) --log the command
 		print(logged) --print the command
 		
-		if string.sub(str,2,2) == runcommand then --only use one argument
+		
+		--removed single-argument mode because you can just concat a tuple table ~oozle
+		
+--[[		if string.sub(str,2,2) == runcommand then --only use one argument
 			
 			command = ""
 			local stop
@@ -259,12 +267,12 @@ function processcommand(str,source)
 			--switching to nested tables to make room for documentation
 			if findcommand(command) then
 				findcommand(command)[2](argument)
-			else
-				print([["]]..command..[[" is not a valid command]])
-			end
+]]--			else
+--				print([["]]..command..[[" is not a valid command]])
+--[[			end
 			
 		else --use multiple arguments
-			
+]]			
 			--split string into its constituent items
 			local items = split(str,divider)		
 			--find the command
@@ -276,7 +284,7 @@ function processcommand(str,source)
 				--concatenate arguments into "arg1, arg2, arg3, arg#" etc
 				local arguments = ""
 				for _,arg in ipairs(items) do
-					arguments = arguments..[["]]..arg..[[",]]
+					arguments = arguments..openbracket..openbracket..arg..closedbracket..closedbracket..","
 				end
 				--assemble the parts
 				local arguments = "("..string.sub(arguments,1,string.len(arguments)-1)..")"
@@ -290,7 +298,7 @@ function processcommand(str,source)
 				print([["]]..string.sub(items[1],2,string.len(items[1]))..[[" is not a valid command]])
 			end
 			
-		end
+--		end
 		
 	elseif header == viewcommanddocumentation then --display info
 		
@@ -390,7 +398,6 @@ if guibase then
 				local minx = 200
 				local miny = 150
 				
-				local commandmode = 1 --1 = !; 2 = !!
 				local currentcommand = commands[1]
 				
 				--new instances
@@ -482,27 +489,10 @@ if guibase then
 					updatedescriptionscrolling()
 				end)
 				
-				--connect to mode changing
-				gui.CommandModeButton.MouseButton1Down:connect(function()
-					commandmode = (commandmode%2)+1
-					if commandmode == 1 then
-						gui.CommandModeButton.Text = "Current input mode: [!] Multiple arguments separated by spaces (click to change)"
-					else
-						gui.CommandModeButton.Text = "Current input mode: [!!] Single argument (click to change)"
-					end
-				end)
-				
 				--connect to the input button and process the commands
 				gui.InputButton.MouseButton1Down:connect(function()
 					if currentcommand then
-						local prefix = ""
-						if commandmode == 1 then
-							prefix = "!"
-						else
-							prefix = "!!"
-						end
-						print(prefix..currentcommand[1].." "..gui.InputField.Text)
-						processcommand(prefix..currentcommand[1].." "..gui.InputField.Text,player.Name.."'s frontend gui")
+						processcommand(runcommand..currentcommand[1].." "..gui.InputField.Text,player.Name.."'s frontend gui")
 					end
 				end)
 				
