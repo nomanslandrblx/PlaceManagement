@@ -83,11 +83,24 @@ local logs = {}
 --these are the commands
 --i included one just for reference and stuff, you can either add commands directly to this table or use the module system ~oozle
 local commands = {
-	{"helloworld",
+	{"helloworld", --this is the "start page" for the gui frontend
 		function()
-			print("hello world")
+			print("this command has no function other than to store the documentation for the frontend GUI. to view the documentation, use ?helloworld")
 		end,
-		"hello, world !!\n\nthank you for choosing placemanagement! :)\n\nthis is a placeholder command"
+		[[Hi there!
+Thank you for choosing PlaceManagement! :)
+
+This is a dummy command which serves no purpose other than to introduce you to this administration suite's frontend GUI!
+
+You can scroll by using the up and down arrows at the right.
+
+Commands can be found at the top. Click on a command to select it. The description box (this box) will display any documentation.
+
+To use commands, first enter arguments in the input field then clicking the run button. If you would like to use only one argument instead of multiple ones separated by spaces, click the input mode button.
+
+Happy administrating!
+
+]]
 	}
 	,
 	{"doexec",
@@ -365,7 +378,9 @@ if guibase then
 				
 				local descriptionscroll = 0
 				local descriptionscrollspeed = 10
-				local descriptionscrollmax = 980-descriptionscrollspeed
+				local descriptionheight = 1000
+				descriptionframe.Description.Size = UDim2.new(1,-20,0,descriptionheight)
+				local descriptionscrollmax = descriptionheight-descriptionscrollspeed
 				
 				local commandscroll = 0
 				local commandscrollspeed = 20
@@ -376,7 +391,7 @@ if guibase then
 				local miny = 150
 				
 				local commandmode = 1 --1 = !; 2 = !!
-				local currentcommand = nil
+				local currentcommand = commands[1]
 				
 				--new instances
 				local commandbuttonbase = commandframe.CommandButton:clone()
@@ -491,43 +506,9 @@ if guibase then
 					end
 				end)
 				
-				--resizing
-				gui.ResizeButton.MouseButton1Down:connect(function()
-					resizing = true
-				end)
-				gui.ResizeButton.MouseLeave:connect(function()
-					resizing = false
-				end)
-				gui.ResizeButton.MouseButton1Up:connect(function()
-					resizing = false
-				end)
-				gui.ResizeButton.MouseMoved:connect(function(x,y)
-					if resizing then
-						
-						--center mouse
-						x = x+(gui.ResizeButton.AbsoluteSize.X/4)
-						y = y+(gui.ResizeButton.AbsoluteSize.Y/4)
-						
-						--limit horizontal
-						if gui.AbsoluteSize.X < minx then
-							x = nil
-						else
-							x = x-gui.AbsolutePosition.X
-						end
-						
-						--limit vertical
-						if gui.AbsoluteSize.Y < miny then
-							y = nil
-						else
-							y = y-gui.AbsolutePosition.Y
-						end
-						
-						--resize
-						gui.Size = UDim2.new(0,(x or gui.AbsoluteSize.X),0,(y or gui.AbsoluteSize.Y))
-						
-					end
-				end)
-				
+				--ready
+				commandframe:GetChildren()[1].BackgroundColor3 = BrickColor.new("Br. yellowish green").Color			
+				updatedescription()
 				print("ready setting up gui for "..player.Name)			
 				
 			end)
