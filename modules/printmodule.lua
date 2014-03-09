@@ -2,8 +2,8 @@
 
 return {
 	"doprint",
-	function(arg1,arg2)
-		print(arg1,arg2)
+	function(...)
+		print(table.concat({...}," "))
 	end,
 	[[==========doprint by oozlebachr
 		
