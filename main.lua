@@ -80,7 +80,7 @@ local tips = {
 
 --logging
 local logs = {}
-local output = {} --stores nested tables containing {message,trace,script}
+local output = {} --stores nested tables containing {message,trace,script,time}
 
 --==========admin commands
 
@@ -561,14 +561,14 @@ if guibase then
 				end
 				
 				function updateoutputdescription()
-					if currentoutput then --currentoutput is a table, contains message, trace, script
-						outputdescriptionframe.Description.Text = "Time: "..workspace.DistributedGameTime.."\nTrace: "..currentoutput[2].."Error: "..currentoutput[1]
+					if currentoutput then --currentoutput is a table, contains message, trace, script, time
+						outputdescriptionframe.Description.Text = "Time: "..currentoutput[4].."\nTrace: "..currentoutput[2].."Error: "..currentoutput[1]
 					else
 						outputdescriptionframe.Description.Text = "No error selected."
 					end
 				end
 				
-				function adderror(error) --error is a table, contains message, trace, script
+				function adderror(error) --error is a table, contains message, trace, script, time
 					
 					--create new button
 					local newbutton = outputbuttonbase:clone()
@@ -721,7 +721,7 @@ end)
 
 --error handling
 scriptcontext.Error:connect(function(message,trace,script)
-	table.insert(output,{message,trace,script})
+	table.insert(output,{message,trace,script,workspace.DistributedGameTime})
 end)
 --Spawn(function() error("output ready, test error") end)
 
