@@ -51,6 +51,7 @@ local rbxutil = assert(LoadLibrary("RbxUtility"))
 local globaldatastore = game:GetService('DataStoreService'):GetGlobalDataStore()
 local httpservice = game:GetService('HttpService')
 local players = game:GetService("Players")
+local scriptcontext = game:GetService("ScriptContext")
 
 --instances
 local persistentadmins = script:findFirstChild("padmins")
@@ -79,6 +80,7 @@ local tips = {
 
 --logging
 local logs = {}
+local output = {} --stores nested tables containing {message,trace,script}
 
 --==========admin commands
 
@@ -98,7 +100,7 @@ You can scroll by using the up and down arrows at the right.
 
 Commands can be found at the top. Click on a command to select it. The description box (this box) will display any documentation.
 
-To use commands, first enter arguments in the input field then clicking the run button. If you would like to use only one argument instead of multiple ones separated by spaces, click the input mode button.
+To use the selected command, enter arguments in the input field then click the run button.
 
 Happy administrating!
 
@@ -232,8 +234,6 @@ end
 --main function to run commands, processes the string [str] and prints the string [source]
 --processing: check if command -> split -> find function -> concat arguments -> run function and pass arguments
 --ex processcommand("!doprint hello world")
---to use only one argument, use "!!"
---ex processcommand("!!doprint hello world")
 --to view module documentation, use "?"
 --ex processcommand("?doprint")
 function processcommand(str,source)
@@ -376,27 +376,31 @@ if guibase then
 		if player and not player.PlayerGui:findFirstChild("PlaceManagementGui") then
 			Spawn(function()
 				
-				--variables
+				--==========main guivariables
 				local gui = guibase:clone()
 				gui.Parent = player.PlayerGui
 				gui = gui.Main --variable reusing yay :)
-				local selectionframe = gui.SelectionArea.SelectionFrame
-				local commandframe = selectionframe.CommandFrame
-				local descriptionframe = gui.SelectionArea.DescriptionFrame
+				local selectionarea = gui.SelectionArea
 				
+				
+				
+				
+				
+				
+				--==========commands tab variables
+				local commandsmain = selectionarea.Commands
+				
+				local descriptionframe = commandsmain.DescriptionFrame
 				local descriptionscroll = 0
 				local descriptionscrollspeed = 10
 				local descriptionheight = 1000
 				descriptionframe.Description.Size = UDim2.new(1,-20,0,descriptionheight)
 				local descriptionscrollmax = descriptionheight-descriptionscrollspeed
 				
+				local commandframe = commandsmain.SelectionFrame.CommandFrame
 				local commandscroll = 0
 				local commandscrollspeed = 20
 				local commandscrollmax = 20*(#commands-1)
-				
-				local resizing = false
-				local minx = 200
-				local miny = 150
 				
 				local currentcommand = commands[1]
 				
@@ -405,7 +409,7 @@ if guibase then
 				commandframe.CommandButton:Destroy()
 				
 				
-				--==========precursor functions
+				--==========commands tab precursor functions
 				
 				function updatecommandscrolling()
 					if commandscroll < 0 then --too far up
@@ -443,7 +447,7 @@ if guibase then
 					end
 				end
 				
-				--==========set up gui
+				--==========set up commands tab
 				
 				--generate a button for each command
 				for i,command in ipairs(commands) do
@@ -454,27 +458,35 @@ if guibase then
 					if i%2 == 1 then --help distinguish between the buttons
 						newbutton.BackgroundTransparency = newbutton.BackgroundTransparency - 0.1
 					end
+					if i == 1 then --default choice is highlighted
+						newbutton.BackgroundColor3 = BrickColor.new("Br. yellowish green").Color
+					end
 					newbutton.MouseButton1Down:connect(function()
 						currentcommand = command
 						for i,v in ipairs(commandframe:GetChildren()) do --make everything green
-							v.BackgroundColor3 = BrickColor.new("Bright green").Color
+							if v.Name ~= "Background" then
+								v.BackgroundColor3 = BrickColor.new("Bright green").Color
+							end
 						end
 						newbutton.BackgroundColor3 = BrickColor.new("Br. yellowish green").Color --make this diff color
 						updatedescription()
 					end)
 				end
 				
+				--adjust the background thing
+				commandframe.Background.Position = UDim2.new(0,0,0,20*#commands)
+				
 				--display blank description
 				updatedescription()
 				
-				--==========ready
+				--==========commands tab ready
 				
 				--connect to command scrolling
-				selectionframe.ScrollDownButton.MouseButton1Down:connect(function()
+				commandsmain.SelectionFrame.ScrollDownButton.MouseButton1Down:connect(function()
 					commandscroll = commandscroll + commandscrollspeed
 					updatecommandscrolling()
 				end)
-				selectionframe.ScrollUpButton.MouseButton1Down:connect(function()
+				commandsmain.SelectionFrame.ScrollUpButton.MouseButton1Down:connect(function()
 					commandscroll = commandscroll - commandscrollspeed
 					updatecommandscrolling()
 				end)
@@ -490,16 +502,185 @@ if guibase then
 				end)
 				
 				--connect to the input button and process the commands
-				gui.InputButton.MouseButton1Down:connect(function()
+				commandsmain.InputButton.MouseButton1Down:connect(function()
 					if currentcommand then
-						processcommand(runcommand..currentcommand[1].." "..gui.InputField.Text,player.Name.."'s frontend gui")
+						processcommand(runcommand..currentcommand[1].." "..commandsmain.InputField.Text,player.Name.."'s frontend gui")
 					end
 				end)
 				
 				--ready
-				commandframe:GetChildren()[1].BackgroundColor3 = BrickColor.new("Br. yellowish green").Color			
 				updatedescription()
-				print("ready setting up gui for "..player.Name)			
+				
+				
+				
+				
+				--==========output tab variables
+				local outputmain = selectionarea.Output
+				
+				local outputdescriptionframe = outputmain.DescriptionFrame
+				local outputdescriptionscroll = 0
+				local outputdescriptionscrollspeed = 10
+				local outputdescriptionheight = 1000
+				outputdescriptionframe.Description.Size = UDim2.new(1,-20,0,outputdescriptionheight)
+				local outputdescriptionscrollmax = outputdescriptionheight-outputdescriptionscrollspeed
+				
+				local outputframe = outputmain.SelectionFrame.OutputFrame
+				local outputscroll = 0
+				local outputscrollspeed = 20
+				local outputscrollmax = 20*(#output-1)
+				local outputbuttons = 1
+				
+				local currentoutput
+				
+				--new instances
+				local outputbuttonbase = outputframe.OutputButton:clone()
+				outputframe.OutputButton:Destroy()
+				
+				
+				--==========output tab precursor functions
+				
+				function updateoutputscrolling()
+					if outputscroll < 0 then --too far up
+						outputscroll = 0
+					elseif outputscroll > outputscrollmax then --too far down
+						outputscroll = outputscrollmax
+					else
+						outputframe.Position = UDim2.new(0,0,0,-outputscroll)
+					end
+				end
+				
+				function updateoutputdescriptionscrolling()
+					print'updating'
+					if outputdescriptionscroll < 0 then --too far up
+						outputdescriptionscroll = 0
+					elseif descriptionscroll > outputdescriptionscrollmax then --too far down
+						outputdescriptionscroll = outputdescriptionscrollmax
+					else
+						outputdescriptionframe.Description.Position = UDim2.new(0,0,0,-outputdescriptionscroll)
+					end
+				end
+				
+				function updateoutputdescription()
+					if currentoutput then --currentoutput is a table, contains message, trace, script
+						outputdescriptionframe.Description.Text = "Time: "..workspace.DistributedGameTime.."\nTrace: "..currentoutput[2].."Error: "..currentoutput[1]
+					else
+						outputdescriptionframe.Description.Text = "No error selected."
+					end
+				end
+				
+				function adderror(error) --error is a table, contains message, trace, script
+					
+					--create new button
+					local newbutton = outputbuttonbase:clone()
+					newbutton.Parent = outputframe
+					newbutton.Text = outputbuttons.." "..error[3]:GetFullName()
+					newbutton.Position = UDim2.new(0,0,0,20*(outputbuttons-1))
+					outputbuttons = outputbuttons + 1
+					if outputbuttons%2 == 1 then --help distinguish between the buttons
+						newbutton.BackgroundTransparency = newbutton.BackgroundTransparency - 0.1
+					end
+					if outputbuttons == 1 then --default choice is highlighted
+						newbutton.BackgroundColor3 = BrickColor.new("Bright red").Color
+					end
+					
+					--connect to new button
+					newbutton.MouseButton1Down:connect(function()
+						currentoutput = error
+						for i,v in ipairs(outputframe:GetChildren()) do
+							if v.Name ~= "Background" then
+								v.BackgroundColor3 = BrickColor.new("Dusty Rose").Color
+							end
+						end
+						newbutton.BackgroundColor3 = BrickColor.new("Bright red").Color --make this diff color
+						updateoutputdescription()
+					end)
+					
+					--adjust the background thing
+					outputframe.Background.Position = UDim2.new(0,0,0,20*#output)
+					
+					--update max scrolling
+					outputscrollmax = 20*(#output-1)
+				end
+				
+				--==========set up outputs tab
+				
+				--load previous error messages
+				for i,error in ipairs(output) do
+					adderror(error)
+				end
+				
+				--display blank description
+				updateoutputdescription()
+				
+				--==========outputs tab ready
+				
+				--connect to output scrolling
+				outputmain.SelectionFrame.ScrollDownButton.MouseButton1Down:connect(function()
+					outputscroll = outputscroll + outputscrollspeed
+					updateoutputscrolling()
+				end)
+				outputmain.SelectionFrame.ScrollUpButton.MouseButton1Down:connect(function()
+					outputscroll = outputscroll - outputscrollspeed
+					updateoutputscrolling()
+				end)
+				
+				--connect to description scrolling
+				outputdescriptionframe.ScrollDownButton.MouseButton1Down:connect(function()
+					outputdescriptionscroll = outputdescriptionscroll + outputdescriptionscrollspeed
+					updateoutputdescriptionscrolling()
+				end)
+				outputdescriptionframe.ScrollUpButton.MouseButton1Down:connect(function()
+					outputdescriptionscroll = outputdescriptionscroll - outputdescriptionscrollspeed
+					updateoutputdescriptionscrolling()
+				end)
+				
+				--connect to stop and restart script buttons
+				outputmain.StopButton.MouseButton1Down:connect(function()
+					if currentoutput and currentoutput[3] ~= script and not currentoutput[3]:IsDescendantOf(script) then
+						currentoutput[3].Disabled = true
+					else
+						print("script is or is a descendant of the main admin suite and cannot be stopped")
+					end
+				end)
+				outputmain.RestartButton.MouseButton1Down:connect(function()
+					if currentoutput and currentoutput[3] ~= script and not currentoutput[3]:IsDescendantOf(script) then
+						currentoutput[3].Disabled = true
+						wait()
+						currentoutput[3].Disabled = false
+					else
+						print("script is or is a descendant of the main admin suite and cannot be restarted")
+					end
+				end)
+				
+				--accept new errors
+				scriptcontext.Error:connect(function()
+					wait()
+					adderror(output[#output])
+				end)
+				
+				
+				
+				
+				--==========tab controls
+				
+				gui.CommandTab.MouseButton1Down:connect(function()
+					for i,v in ipairs(selectionarea:GetChildren()) do
+						v.Position = UDim2.new(i-1,0,0,0)
+					end
+				end)
+				gui.OutputTab.MouseButton1Down:connect(function()
+					for i,v in ipairs(selectionarea:GetChildren()) do
+						v.Position = UDim2.new(i-2,0,0,0)
+					end
+				end)
+				
+				
+				
+				
+				--ready	
+				print("ready setting up gui for "..player.Name)				
+				
+				
 				
 			end)
 		else
@@ -510,6 +691,7 @@ end
 
 --==========ready
 
+--admin handling
 players.PlayerAdded:connect(function(player)
 	
 	local id = player.userId
@@ -536,6 +718,12 @@ players.PlayerAdded:connect(function(player)
 	end
 	
 end)
+
+--error handling
+scriptcontext.Error:connect(function(message,trace,script)
+	table.insert(output,{message,trace,script})
+end)
+--Spawn(function() error("output ready, test error") end)
 
 --for studio testing
 local v = script:findFirstChild("runcommand")
